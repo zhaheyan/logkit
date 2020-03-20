@@ -1,0 +1,53 @@
+# 1.数据库安装
+
+apt install python3.7-dev
+apt install libmysqlclient-dev
+
+python3.7 -m pip install virtualenv -i https://pypi.tuna.tsinghua.edu.cn/simple
+python3.7 -m virtualenv --clear venv
+pip install -i https://pypi.doubanio.com/simple/ --trusted-host pypi.doubanio.com -r requestment.txt
+
+
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY 'root';
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY 'root' WITH GRANT OPTION;
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY 'root' WITH GRANT OPTION;
+
+FLUSH PRIVILEGES;
+
+swagger-ui
+https://cloud.tencent.com/developer/article/1576613
+
+
+
+apt autoremove --purge mysql-server-*
+apt autoremove --purge mysql-client-*
+apt remove mysql-common
+
+dpkg -l |grep ^rc|awk '{print $2}' |sudo xargs dpkg -P 
+
+sudo rm -rf /etc/mysql
+sudo rm -rf /var/lib/mysql
+
+sudo apt autoremove
+sudo apt autoreclean
+
+apt install mysql-server
+apt install mysql-client
+apt install libmysqlclient-dev
+
+pip install  -i  https://pypi.doubanio.com/simple/  --trusted-host pypi.doubanio.com -r requestment.txt  
+
+
+# 2.创建数据库和表
+CREATE DATABASE logkit DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+python manage.py makemigrations
+python manage.py migrate
+
+# 3.运行
+python manage.py runserver 8080
+
+# 4.测试
+(venv) jiuchou@jiuchou-X455LD-computer:~/logkit/ops-server/logkit$ curl -X GET 'http://192.168.1.107:8080/opsserver/info?limit=10&page=1'
+{"data_list": [], "total": 0, "message": "SUCCESS: Get data list information successful!", "status_code": 200}
+
+
