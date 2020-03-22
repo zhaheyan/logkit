@@ -17,32 +17,10 @@ from rest_framework.views import APIView
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 
+from logkit.utils.api import get_request_args
 from opsserver.models import RequestData
 
-LOG = logging.getLogger('opsserver')
-
-
-def get_request_args(func):
-    def _get_request_args(self, request):
-        if request.method == 'GET':
-            LOG.info(request.GET)
-            args = request.GET
-        else:
-            # body = request.body
-            body = request.data
-            if body:
-                try:
-                    # args = json.loads(body)
-                    args = body
-                except Exception as e:
-                    LOG.error(e)
-                    # return makeJsonResponse(status=StatusCode.EXECUTE_FAIL, message=str(e))
-                    args = request.POST
-            else:
-                args = request.POST
-        return func(self, request, args)
-
-    return _get_request_args
+LOG = logging.getLogger('default')
 
 
 class OpsServerView(APIView):
@@ -52,18 +30,20 @@ class OpsServerView(APIView):
         operation_description="ops-server post description override",
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
-            required=['remote_addr', "remote_user"],
+            required=['remote_addr', "remote_user", 'token'],
             properties={
                 'remote_addr': openapi.Schema(type=openapi.TYPE_STRING),
-                'remote_user': openapi.Schema(type=openapi.TYPE_STRING)
+                'remote_user': openapi.Schema(type=openapi.TYPE_STRING),
+                'token': openapi.Schema(type=openapi.IN_HEADER),
             },
         ),
-        security=[]
+        #security=[]
     )
     @get_request_args
     def post(self, request, args):
         """docstring"""
         response = {}
+        print(request.META)
 
         LOG.info(args)
         remote_addr = args['remote_addr']
@@ -111,9 +91,11 @@ class OpsServerView(APIView):
                                    type=openapi.TYPE_INTEGER)
     page = openapi.Parameter("page", openapi.IN_QUERY, description="page number",
                                    type=openapi.TYPE_INTEGER)
+    token = openapi.Parameter("token", openapi.IN_HEADER, description="token",
+                                   type=openapi.IN_HEADER)
     @swagger_auto_schema(operation_description="partial_update description override",
                          responses={404: 'args not found'},
-                         manual_parameters=[limit, page])
+                         manual_parameters=[limit, page, token])
     @get_request_args
     def get(self, request, args):
         """Get nginx request data information from database."""
@@ -136,4 +118,56 @@ class OpsServerView(APIView):
         response['status_code'] = 200
         return JsonResponse(response)
 
+from opsserver.models import IPCount
+
+class IPCountView(APIView):
+    """count ip number from address"""
+    def get(self, request):
+        """get ip count"""
+        response = {'status_code': 200, 'message': '查询成功'}
+
+        try:
+            ip_counts = IPCount.objects.all()
+            response['data'] = json.loads(serializers.serialize("json", ip_counts))
+        except Exception as e:
+            response['status_code'] = "500"
+            response['message'] = "获取agent信息失败. {}".format(e)
+
+        return JsonResponse(response)
+
+class LogManagerView(APIView):
+    """manage database log data"""
+
+    @swagger_auto_schema(
+        operation_description="ops-server delete log info",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=['agent_ip', 'remote_addr', 'request', 'token'],
+            properties={
+                'agent_ip': openapi.Schema(type=openapi.TYPE_STRING),
+                'remote_addr': openapi.Schema(type=openapi.TYPE_STRING),
+                'request': openapi.Schema(type=openapi.TYPE_STRING),
+                'token': openapi.Schema(type=openapi.IN_HEADER),
+            },
+        ),
+        security=[]
+    )
+    @get_request_args
+    def post(self, request, args):
+        """docstring"""
+        response = {}
+
+        try:
+            LOG.info(args)
+            # 数据库更新数据，如果不存在，创建
+            # RequestData.objects.update_or_create(remote_addr=remote_addr, remote_user=remote_user)
+        except Exception as e:
+            LOG.error("error info: %s", e)
+            response['message'] = "ERROR: Update RequestData information to database failed!"
+            response['status_code'] = 500
+            return JsonResponse(response)
+
+        response['message'] = "SUCCESS: Update RequestData information to database successful!"
+        response['status_code'] = 200
+        return JsonResponse(response)
 

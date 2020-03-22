@@ -33,7 +33,9 @@ ALLOWED_HOSTS = [
 # Application definition
 
 PLUGIN_APPS = [
+    'user',
     'opsserver',
+    'agent',
 ]
 
 INSTALLED_APPS = [
@@ -140,6 +142,12 @@ STATICFILES_DIRS = [
 ]
 
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': ['logkit.utils.auth.MyAuthentication',],
+    #'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
+}
+
+
 # swagger
 SWAGGER_SETTINGS = {
     # basic
@@ -148,11 +156,16 @@ SWAGGER_SETTINGS = {
             'type': 'basic'
         }
     },
+    'Bearer': {
+        'type': 'apiKey',
+        'name': 'token',
+        'in': 'header'
+    },
     # 如果需要登录才能够查看接口文档, 登录的链接使用restframework自带的.
     # 'LOGIN_URL': 'rest_framework:login',
     # 'LOGOUT_URL': 'rest_framework:logout',
     # 'DOC_EXPANSION': None,
-    # 'SHOW_REQUEST_HEADERS':True,
+    'SHOW_REQUEST_HEADERS':True,
     # 'USE_SESSION_AUTH': True,
     # 'DOC_EXPANSION': 'list',
     # 接口文档中方法列表以首字母升序排列
@@ -196,6 +209,16 @@ LOGGING = {
             # 'filters': ['special']
             'formatter': 'simple'
         },
+        'default': {
+            'level': 'INFO',
+            # save to file, rotating
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': '{}/log/logkit.log'.format(BASE_DIR),
+            'maxBytes': 1024 * 1024 * 5,
+            'backupCount': 3,
+            'formatter': 'standard',
+            'encoding': 'utf-8'
+        },
         'opsserver': {
             'level': 'INFO',
             # save to file, rotating
@@ -222,7 +245,13 @@ LOGGING = {
             'level': 'INFO',
             # 是否向更高级别的logger传递
             'propagate': True
-        }
+        },
+        'default': {
+            'handlers': ['console', 'default'],
+            'level': 'INFO',
+            # 是否向更高级别的logger传递
+            'propagate': True
+        },
     }
 }
 
