@@ -25,11 +25,11 @@ class RegisterView(APIView):
                 'email': openapi.Schema(type=openapi.FORMAT_EMAIL),
             },
         ),
-        responses={201: "{'status_code': 201, 'message': '注册成功'}"},
+        responses={200: "{'status_code': 200, 'message': '注册成功'}"},
         security=[]
     )
     def post(self, request, *args, **kwargs):
-        response = {'status_code': 201, "message": "注册成功"}
+        response = {'status_code': 200, "message": "注册成功"}
 
         username = request.data.get('username')
         email = request.data.get('email')
@@ -44,7 +44,7 @@ class RegisterView(APIView):
                 response['status_code'] = 400
                 response['message'] = '注册失败'
         else:
-            response['status_code'] = 202
+            response['status_code'] = 201
             response['message'] = "用户已存在"
         return JsonResponse(response)
 
@@ -63,11 +63,11 @@ class LoginView(APIView):
                 'password': openapi.Schema(type=openapi.TYPE_STRING),
             },
         ),
-        responses={201: "{'status_code': 201, 'message': '登录成功'}"},
+        responses={200: "{'status_code': 200, 'message': '登录成功'}"},
         security=[]
     )
     def post(self, request, *args, **kwargs):
-        response = {'status_code': 201, 'message': '登录成功'}
+        response = {'status_code': 200, 'message': '登录成功'}
 
         username = request.data.get('username')
         password = request.data.get('password')
