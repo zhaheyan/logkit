@@ -10,6 +10,7 @@ View is an logical management library, written in Python, for opsserver beings.
 import json
 import logging
 
+from django.core import serializers
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.http import JsonResponse
 from rest_framework.exceptions import APIException
@@ -122,7 +123,14 @@ from opsserver.models import IPCount
 
 class IPCountView(APIView):
     """count ip number from address"""
-    def get(self, request):
+
+    token = openapi.Parameter("token", openapi.IN_HEADER, description="token",
+                                   type=openapi.IN_HEADER)
+    @swagger_auto_schema(operation_description="ipcount token",
+                         responses={404: 'args not found'},
+                         manual_parameters=[token])
+    @get_request_args
+    def get(self, request, args):
         """get ip count"""
         response = {'status_code': 200, 'message': '查询成功'}
 
