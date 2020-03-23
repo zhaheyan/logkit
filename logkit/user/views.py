@@ -25,26 +25,26 @@ class RegisterView(APIView):
                 'email': openapi.Schema(type=openapi.FORMAT_EMAIL),
             },
         ),
+        responses={201: "{'status_code': 201, 'message': '注册成功'}"},
         security=[]
     )
     def post(self, request, *args, **kwargs):
-        response = {'status_code': 200, "message": "注册成功"}
+        response = {'status_code': 201, "message": "注册成功"}
 
         username = request.data.get('username')
-        password = request.data.get("password")
+        email = request.data.get('email')
         user_obj = User.objects.filter(username=username)
         if not user_obj:
             # 反序列话
             user = UserSerializer(data=request.data)
-            print(user)
             if user.is_valid():
                 user.save()
-                response['data'] = user.validated_data
+                response['data'] = {'username': username, 'email': email}
             else:
                 response['status_code'] = 400
                 response['message'] = '注册失败'
         else:
-            response['status_code'] = 201
+            response['status_code'] = 202
             response['message'] = "用户已存在"
         return JsonResponse(response)
 
@@ -63,20 +63,25 @@ class LoginView(APIView):
                 'password': openapi.Schema(type=openapi.TYPE_STRING),
             },
         ),
+        responses={201: "{'status_code': 201, 'message': '登录成功'}"},
         security=[]
     )
     def post(self, request, *args, **kwargs):
-        response = {'status_code': 200, 'message': '登录成功'}
+        response = {'status_code': 201, 'message': '登录成功'}
 
         username = request.data.get('username')
         password = request.data.get('password')
-        user_obj = User.objects.get(username=username)
+        user_obj = User.objects.get(username=username, password=password)
         if not user_obj:
             response['status_code'] = 401
             response['message'] = '登录失败，用户不存在'
         else:
             token = jwt_token.create_token(user_obj.username)
-            response['token'] = token
+            response['data'] = {
+		'token': token,
+                'username': user_obj.username,
+                'email': user_obj.email,
+            }
 
         return JsonResponse(response)
 
