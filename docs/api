@@ -1,0 +1,139 @@
+1.
+注册：http://192.168.1.107:8080/user/register
+
+curl -X POST "http://192.168.1.107:8080/user/register" -H "accept: application/json" -H "Content-Type: application/json" -H "X-CSRFToken: 6jl4Ai1t7U0VcAGBhbZIc2LS7Tl8tmTUEk2jBarWd8PaMc6FGsFchwEv7lQGqij4" -d "{ \"username\": \"string\", \"password\": \"string\", \"email\": \"Unknown Type: email\"}"
+
+{
+  "status_code": 201,
+  "message": "用户已存在"
+}
+
+
+2.
+登录：http://192.168.1.107:8080/user/login
+
+curl -X POST "http://192.168.1.107:8080/user/login" -H "accept: application/json" -H "Content-Type: application/json" -H "X-CSRFToken: 6jl4Ai1t7U0VcAGBhbZIc2LS7Tl8tmTUEk2jBarWd8PaMc6FGsFchwEv7lQGqij4" -d "{ \"username\": \"string\", \"password\": \"string\"}"
+
+{
+  "status_code": 200,
+  "message": "登录成功",
+  "data": {
+    "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJsb2draXQiLCJzdWIiOiJsb2draXQtY29uc29sZSIsInVzZXJuYW1lIjoic3RyaW5nIiwiZXhwIjoxNTg1MDcyMjk1LCJpYXQiOjE1ODUwNjg2OTV9.0AsIpmID8pw9F7qJ3mhSpr5mV6uUiKB49vqUCzhi_QY",
+    "username": "string",
+    "email": "email@qq.com"
+  }
+}
+
+
+3.
+查看agent状态：http://192.168.1.107:8080/agent/status
+
+curl -X GET "http://192.168.1.107:8080/agent/status" -H "accept: application/json" -H "token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJsb2draXQiLCJzdWIiOiJsb2draXQtY29uc29sZSIsInVzZXJuYW1lIjoic3RyaW5nIiwiZXhwIjoxNTg1MDcxNzQ2LCJpYXQiOjE1ODUwNjgxNDZ9.PG4sq4DNkN6H9-rrPMToZKPmNH_bkuKmyUv3eqfg4Ks" -H "X-CSRFToken: 6jl4Ai1t7U0VcAGBhbZIc2LS7Tl8tmTUEk2jBarWd8PaMc6FGsFchwEv7lQGqij4"
+
+{
+  "status_code": 200,
+  "message": "获取信息成功",
+  "data": [
+    {
+      "model": "agent.agent",
+      "pk": 1,
+      "fields": {
+        "agent_ip": "192.168.1.107:8000",
+        "agent_status": "health",
+        "management": "generality",
+        "operation": ""
+      }
+    }
+  ]
+}
+
+
+4. 
+TODO：后端定时任务
+agent健康检查：http://192.168.1.107:8080/agent/health_check
+
+curl -X GET "http://192.168.1.107:8080/agent/health_check" -H "accept: application/json" -H "token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJsb2draXQiLCJzdWIiOiJsb2draXQtY29uc29sZSIsInVzZXJuYW1lIjoic3RyaW5nIiwiZXhwIjoxNTg1MDcxNzQ2LCJpYXQiOjE1ODUwNjgxNDZ9.PG4sq4DNkN6H9-rrPMToZKPmNH_bkuKmyUv3eqfg4Ks" -H "X-CSRFToken: 6jl4Ai1t7U0VcAGBhbZIc2LS7Tl8tmTUEk2jBarWd8PaMc6FGsFchwEv7lQGqij4"
+
+{
+  "status_code": 200,
+  "message": "操作成功"
+}
+
+
+5.
+日志收集：http://192.168.1.107:8080/opsserver/logs/collect
+
+curl -X GET "http://192.168.1.107:8080/opsserver/logs/collect" -H "accept: application/json" -H "token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJsb2draXQiLCJzdWIiOiJsb2draXQtY29uc29sZSIsInVzZXJuYW1lIjoic3RyaW5nIiwiZXhwIjoxNTg1MDcxNzQ2LCJpYXQiOjE1ODUwNjgxNDZ9.PG4sq4DNkN6H9-rrPMToZKPmNH_bkuKmyUv3eqfg4Ks" -H "X-CSRFToken: 6jl4Ai1t7U0VcAGBhbZIc2LS7Tl8tmTUEk2jBarWd8PaMc6FGsFchwEv7lQGqij4"
+
+{
+  "status_code": 200,
+  "message": "收集成功",
+  "data": {
+    "health_ip": [
+      "192.168.1.107:8000"
+    ],
+    "abnormal_ip": []
+  }
+}
+
+
+6.
+日志查看：http://192.168.1.107:8080/opsserver/logs/check?limit=2&page=1
+
+curl -X GET "http://192.168.1.107:8080/opsserver/logs/check?limit=2&page=1" -H "accept: application/json" -H "token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJsb2draXQiLCJzdWIiOiJsb2draXQtY29uc29sZSIsInVzZXJuYW1lIjoic3RyaW5nIiwiZXhwIjoxNTg1MDcxNzQ2LCJpYXQiOjE1ODUwNjgxNDZ9.PG4sq4DNkN6H9-rrPMToZKPmNH_bkuKmyUv3eqfg4Ks" -H "X-CSRFToken: 6jl4Ai1t7U0VcAGBhbZIc2LS7Tl8tmTUEk2jBarWd8PaMc6FGsFchwEv7lQGqij4"
+
+{
+  "data_list": [
+    {
+      "id": 1305,
+      "agent_ip": "192.168.1.107:8000",
+      "remote_addr": null,
+      "request_time": "2020-03-20 11:59:25",
+      "method": "GET",
+      "url": "/",
+      "protocol": null,
+      "status": 404,
+      "size": 548,
+      "user_agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36",
+      "country": "",
+      "exist": true,
+      "join_time": "2020-03-25T00:14:39.594"
+    },
+    {
+      "id": 979,
+      "agent_ip": "192.168.1.107:8000",
+      "remote_addr": null,
+      "request_time": "2020-03-20 11:59:25",
+      "method": "GET",
+      "url": "/",
+      "protocol": null,
+      "status": 404,
+      "size": 548,
+      "user_agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36",
+      "country": null,
+      "exist": true,
+      "join_time": "2020-03-24T23:20:30.263"
+    }
+  ],
+  "total": 652,
+  "message": "SUCCESS: Get data list information successful!",
+  "status_code": 200
+}
+
+7.
+TODO：实际内容编写
+ip信息统计：http://192.168.1.107:8080/opsserver/logs/ipcount
+
+curl -X GET "http://192.168.1.107:8080/opsserver/logs/ipcount" -H "accept: application/json" -H "token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJsb2draXQiLCJzdWIiOiJsb2draXQtY29uc29sZSIsInVzZXJuYW1lIjoic3RyaW5nIiwiZXhwIjoxNTg1MDcyMjk1LCJpYXQiOjE1ODUwNjg2OTV9.0AsIpmID8pw9F7qJ3mhSpr5mV6uUiKB49vqUCzhi_QY" -H "X-CSRFToken: 6jl4Ai1t7U0VcAGBhbZIc2LS7Tl8tmTUEk2jBarWd8PaMc6FGsFchwEv7lQGqij4"
+
+{
+  "status_code": 200,
+  "message": "查询成功",
+  "data": []
+}
+
+
+8.
+TODO：实际内容编写
+删除指定日志：http://192.168.1.107:8080/opsserver/logs/delete
+
