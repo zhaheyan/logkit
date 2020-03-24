@@ -28,9 +28,7 @@ from django.utils import timezone
 
 
 class RequestData(models.Model):
-    """request data"""
-    # id = models.IntegerField(primary_key=True, blank=True)a
-    id = models.AutoField(primary_key=True)
+    """request data
     agent_ip = models.CharField(max_length=16, blank=True)
     remote_addr = models.CharField(max_length=512, blank=True, null=True)
     http_x_forwarded_for = models.CharField(max_length=512, blank=True, null=True)
@@ -46,8 +44,20 @@ class RequestData(models.Model):
     http_referer = models.CharField(max_length=512, blank=True, null=True)
     request_length = models.CharField(max_length=512, blank=True, null=True)
     request_time = models.CharField(max_length=512, blank=True, null=True)
-    exist = models.BooleanField(default=True)
-    time_iso8601 = models.CharField(max_length=512, blank=True, null=True)
+    """
+    # id = models.IntegerField(primary_key=True, blank=True)
+    id = models.AutoField(primary_key=True)
+    agent_ip = models.CharField(max_length=32, blank=True)
+    remote_addr = models.CharField(max_length=32, blank=True, null=True)
+    request_time = models.CharField(max_length=32, blank=True, null=True)
+    method = models.CharField(max_length=32, blank=True, null=True)
+    url = models.CharField(max_length=1024, blank=True, null=True)
+    protocol = models.CharField(max_length=32, blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True)
+    size = models.IntegerField(blank=True, null=True)
+    user_agent = models.CharField(max_length=512, blank=True, null=True)
+    country = models.CharField(max_length=256, blank=True, null=True)
+    exist = models.BooleanField(blank=True, default=True)
     join_time = models.DateTimeField("加入时间", default=timezone.now)
 
     class Meta:

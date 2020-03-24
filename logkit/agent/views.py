@@ -1,5 +1,7 @@
 import json
 import logging
+import requests
+
 from django.core import serializers
 from rest_framework.views import APIView
 from django.http import JsonResponse
@@ -34,28 +36,36 @@ class AgentView(APIView):
         return JsonResponse(response)
 
 
-class AgentManagerView(APIView):
+from django.conf import settings
+
+
+class AgentHealthCheckView(APIView):
     """docsting"""
 
-    @swagger_auto_schema(
-        operation_description="handle log",
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            required=['agent_ip', "operation", 'token'],
-            properties={
-                'agent_ip': openapi.Schema(type=openapi.TYPE_STRING),
-                'operation': openapi.Schema(type=openapi.TYPE_STRING),
-                'token': openapi.Schema(type=openapi.IN_HEADER),
-            },
-        ),
-        security=[]
-    )
-    @get_request_args
-    def post(self, request, args):
+    token = openapi.Parameter("token", openapi.IN_HEADER, description="token",
+                                   type=openapi.IN_HEADER)
+    @swagger_auto_schema(operation_description="agent health check",
+                         responses={404: 'args not found'},
+                         manual_parameters=[token])
+    def get(self, request):
         """docstring"""
         response = {'status_code': 200, "message": "操作成功"}
 
-        LOG.info(args)
+        try:
+            agents_info = settings.OPSAGENT['agents_info']
+            for agent_info in agents_info:
+                agent_url = agent_info + "/agent/health_check"
+                agent_ip = agent_url.split('/')[2]
+                r = requests.get(agent_url)
+                if r.status_code == 200:
+                    Agent.objects.filter(agent_ip=agent_ip).update(agent_status='health')
+                else:
+                    Agent.objects.filter(agent_ip=agent_ip).update(agent_status='abnormal')
+                LOG.info("check agent: %s", agent_ip)
+        except Exception as e:
+            response['status_code'] = "500"
+            response['message'] = "检查agent信息失败. {}".format(e)
+            LOG.error('check agent status failed! error info: %s', e)
 
         return JsonResponse(response)
 

@@ -6,7 +6,7 @@ from datetime import datetime
 # line = '182.254.52.17 - - [23/Mar/2020:22:33:25 +0800] "GET http://www.raozp.com/s.php HTTP/1.1" 404 146 "-" "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:57.0) Gecko/20100101 Firefox/57.0"'
 
 def extract(line):
-    pattern = '''(?P<remote_addr>[\d\.]{7,}) - - (?:\[(?P<datetime>[^\[\]]+)\]) "(?P<request>[^"]+)" (?P<status>\d+) (?P<size>\d+) "(?:[^"]+)" "(?P<user_agent>[^"]+)"'''
+    pattern = '''(?P<remote_addr>[\d\.]{7,}) - - (?:\[(?P<request_time>[^\[\]]+)\]) "(?P<request>[^"]+)" (?P<status>\d+) (?P<size>\d+) "(?:[^"]+)" "(?P<user_agent>[^"]+)"'''
     regex = re.compile(pattern)
     matcher = regex.match(line)
     return matcher.groupdict()
@@ -21,7 +21,7 @@ def get_log(line):
         'request': lambda request: dict(zip(('method', 'url', 'protocol'), request.split())),
         'size': int,
         'status': int,
-        'datetime': lambda timestr: time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.mktime(time.strptime(timestr, "%d/%b/%Y:%H:%M:%S %z"))))
+        'request_time': lambda timestr: time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.mktime(time.strptime(timestr, "%d/%b/%Y:%H:%M:%S %z"))))
     }
 
     #写入新字典，key,value

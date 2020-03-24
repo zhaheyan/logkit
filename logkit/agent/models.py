@@ -6,7 +6,7 @@ class Agent(models.Model):
     """request data"""
     # id = models.IntegerField(primary_key=True, blank=True)a
     id = models.AutoField(primary_key=True)
-    agent_ip = models.CharField(max_length=16, blank=True)
+    agent_ip = models.CharField(max_length=32, blank=True)
     agent_status = models.CharField(max_length=8, choices=(("health", "正常"), ("abnormal", "异常")))
     management = models.CharField(max_length=16, blank=True, null=True)
     operation = models.CharField(max_length=16, blank=True, null=True)

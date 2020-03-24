@@ -13,7 +13,8 @@ from django.urls import path
 from opsserver import views
 
 urlpatterns = [
-    path("info", views.OpsServerView.as_view()),
+    path("logs/check", views.OpsServerView.as_view()),
+    path("logs/collect", views.LogCollectView.as_view()),
     path("logs/ipcount", views.IPCountView.as_view()),
     path("logs/delete", views.LogManagerView.as_view()),
 ]

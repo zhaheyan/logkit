@@ -44,8 +44,31 @@ class MainHandler(tornado.web.RequestHandler):
             # self.send_error(500)
 
 
+class HealthCheckHandler(tornado.web.RequestHandler):
+    def get(self):
+        try:
+            print('health check')
+            self.set_status(200)
+            result = {
+                "message": 'API health',
+                'status_code': 200
+            }
+            self.write(result)
+        except Exception as e:
+            print(e)
+            self.set_status(500)
+            result = {
+                "message": 'API abnormal: internal server error',
+                'status_code': 500
+            }
+            self.write(result)
+
+
 # 创建路由表
-urls = [(r"/agent/get_logs", MainHandler),]
+urls = [
+    (r"/agent/get_logs", MainHandler),
+    (r"/agent/health_check", HealthCheckHandler),
+]
 
 
 def main():

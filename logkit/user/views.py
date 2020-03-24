@@ -42,7 +42,7 @@ class RegisterView(APIView):
                 response['data'] = {'username': username, 'email': email}
             else:
                 response['status_code'] = 400
-                response['message'] = '注册失败'
+                response['message'] = '注册失败：无效的参数'
         else:
             response['status_code'] = 201
             response['message'] = "用户已存在"

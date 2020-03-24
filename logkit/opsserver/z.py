@@ -40,23 +40,19 @@ class LogCollectView(APIView):
     def get(self, request, args):
         """collect"""
         response = {'status_code': 200, 'message': '收集成功', 'data': {}}
-        response['data'] = {
-            'health_ip': [],
-            'abnormal_ip': []
-        }
+        response['data'] = {'abnormal_ip': []}
 
         LOG.info('Begin collect log data...')
         try:
-            agents_info = settings.OPSAGENT['agents_info']
-            for agent_info in agents_info:
-                agent_url = agent_info + "/agent/get_logs"
+            agent_urls = settings.OPSAGENT['GET']['get_logs_urls']
+            for agent_url in agent_urls:
                 agent_ip = agent_url.split('/')[2]
-                LOG.info("Begin update agent_ip: %s", agent_ip)
 
-                agent_obj = Agent.objects.get(agent_ip=agent_ip)
-                if not agent_obj:
-                    agent_obj = Agent.objects.create(agent_ip=agent_ip, agent_status='health', management='update', operation='collect')
-                if agent_obj.agent_status == 'health':
+                agent = Agent.objects.get(agent_ip=agent_ip)
+                if not agent:
+                    Agent.objects.create(agent_ip=agent_ip, agent_status='health', management='update', operation='collect')
+
+                if agent.agent_status == 'health':
                     Agent.objects.filter(agent_ip=agent_ip).update(management='update', operation='collect')
                 else:
                     response['data']['abnormal_ip'].append(agent_ip)
@@ -89,9 +85,7 @@ class LogCollectView(APIView):
                                                          size=size,
                                                          user_agent=user_agent,
                                                          country=country)
-                Agent.objects.filter(agent_ip=agent_ip).update(management='generality', operation='')
-                response['data']['health_ip'].append(agent_ip)
-                LOG.info("update agent log success! agent_ip: %s", agent_ip)
+                    LOG.info("update agent log success! agent_ip: %s", agent_ip)
             LOG.info('collect log data success!')
         except Exception as e:
             response['status_code'] = "500"
@@ -111,7 +105,7 @@ class OpsServerView(APIView):
         datas = []
 
         try:
-            datas = RequestData.objects.values().order_by('request_time').filter(exist=True)
+            datas = RequestData.objects.values().order_by('request_time')
         except Exception as e:
             raise APIException("ERROR: Get datas from database failed! {0}".format(e))
         total = len(datas)
@@ -188,6 +182,7 @@ class IPCountView(APIView):
             response['message'] = "获取agent信息失败. {}".format(e)
 
         return JsonResponse(response)
+
 
 class LogManagerView(APIView):
     """manage database log data"""

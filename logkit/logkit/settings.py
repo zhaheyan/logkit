@@ -180,19 +180,15 @@ SWAGGER_SETTINGS = {
 
 LOGGING = {
     'version': 1,
+    # 禁用已经存在的logger实例
     'disable_existing_loggers': False,
     'formatters': {
         'standard': {
-            'format': '%s(levelname)-5s [%(asctime)s [%(name)s %(filename)s line:%(lineno)d]] %(message)s',
-            'datefmt': '%Y-%m-%d %H:%M:%S',
-        },
-        'verbose': {
-            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
-            'style': '{',
+            'format': '[%(asctime)s][%(threadName)s:%(thread)d][task_id:%(name)s][%(filename)s:%(lineno)d]'
+                      '[%(levelname)s][%(message)s]'
         },
         'simple': {
-            'format': '{levelname} {message}',
-            'style': '{',
+            'format': '[%(levelname)s][%(asctime)s][%(filename)s:%(lineno)d]%(message)s'
         },
     },
     'filters': {
@@ -203,6 +199,7 @@ LOGGING = {
     'handlers': {
         'console': {
             'level': 'INFO',
+            # 只有在Django debug为True时才在屏幕打印日志
             'filters': ['require_debug_true'],
             # 'class': 'django.utils.log.AdminEmailHandler',
             'class': 'logging.StreamHandler',
@@ -219,32 +216,11 @@ LOGGING = {
             'formatter': 'standard',
             'encoding': 'utf-8'
         },
-        'opsserver': {
-            'level': 'INFO',
-            # save to file, rotating
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': '{}/log/opsserver.log'.format(BASE_DIR),
-            'maxBytes': 1024 * 1024 * 5,
-            'backupCount': 3,
-            'formatter': 'standard',
-            'encoding': 'utf-8'
-        },
     },
     'loggers': {
         'django': {
             'handlers': ['console'],
             'propagate': True,
-        },
-        'django.request': {
-            'handlers': ['console'],
-            'level': 'ERROR',
-            'propagate': False,
-        },
-        'opsserver': {
-            'handlers': ['console', 'opsserver'],
-            'level': 'INFO',
-            # 是否向更高级别的logger传递
-            'propagate': True
         },
         'default': {
             'handlers': ['console', 'default'],
@@ -254,4 +230,20 @@ LOGGING = {
         },
     }
 }
+
+
+# agent
+OPSAGENT = {
+    'agents_info': [
+        'http://192.168.1.107:8000',
+    ]
+}
+
+#{
+#    'GET': {
+#        'get_logs_urls': [
+#            'http://192.168.1.107:8000/agent/get_logs',
+#        ]
+#    }
+#}
 
