@@ -71,17 +71,21 @@ class LoginView(APIView):
 
         username = request.data.get('username')
         password = request.data.get('password')
-        user_obj = User.objects.get(username=username, password=password)
+        user_obj = User.objects.filter(username=username)
         if not user_obj:
             response['status_code'] = 401
-            response['message'] = '登录失败，用户不存在'
+            response['message'] = '登录失败: 用户不存在'
         else:
-            token = jwt_token.create_token(user_obj.username)
-            response['data'] = {
-		'token': token,
-                'username': user_obj.username,
-                'email': user_obj.email,
-            }
-
+            user_obj = User.objects.filter(username=username, password=password)
+            if not user_obj:
+                response['status_code'] = 403
+                response['message'] = '登录失败: 密码错误'
+            else:
+                token = jwt_token.create_token(user_obj[0].username)
+                response['data'] = {
+	            'token': token,
+                    'username': user_obj[0].username,
+                    'email': user_obj[0].email,
+                }
         return JsonResponse(response)
 

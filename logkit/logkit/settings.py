@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_crontab',
     'rest_framework',
     'drf_yasg',
 ] + PLUGIN_APPS
@@ -184,8 +185,10 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'standard': {
-            'format': '[%(asctime)s][%(threadName)s:%(thread)d][task_id:%(name)s][%(filename)s:%(lineno)d]'
-                      '[%(levelname)s][%(message)s]'
+            #'format': '[%(asctime)s][%(threadName)s:%(thread)d][task_id:%(name)s][%(filename)s:%(lineno)d]'
+            #          '[%(levelname)s][%(message)s]'
+            'format': '%(levelname)-5s [%(asctime)s [%(name)s %(filename)s line: %(lineno)d]] %(message)s',
+            'datefmt': '%Y-%m-%d %H:%M:%S'
         },
         'simple': {
             'format': '[%(levelname)s][%(asctime)s][%(filename)s:%(lineno)d]%(message)s'
@@ -230,6 +233,12 @@ LOGGING = {
         },
     }
 }
+
+
+# crontab
+CRONJOBS = [
+    ('*/1 * * * *', 'agent.crontab.check_agent_health'),
+]
 
 
 # agent

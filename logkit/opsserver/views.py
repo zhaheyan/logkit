@@ -21,9 +21,9 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 
 from logkit.utils.api import get_request_args
-from logkit.utils.ipcity import get_country
-from opsserver.models import RequestData
+from logkit.utils.iputils import get_ip_location
 from agent.models import Agent
+from opsserver.models import RequestData
 
 LOG = logging.getLogger('default')
 
@@ -53,10 +53,10 @@ class LogCollectView(APIView):
                 agent_ip = agent_url.split('/')[2]
                 LOG.info("Begin update agent_ip: %s", agent_ip)
 
-                agent_obj = Agent.objects.get(agent_ip=agent_ip)
+                agent_obj = Agent.objects.filter(agent_ip=agent_ip)
                 if not agent_obj:
-                    agent_obj = Agent.objects.create(agent_ip=agent_ip, agent_status='health', management='update', operation='collect')
-                if agent_obj.agent_status == 'health':
+                    agent_obj = Agent.objects.create(agent_ip=agent_ip, agent_status='health')
+                if agent_obj[0].agent_status == 'health':
                     Agent.objects.filter(agent_ip=agent_ip).update(management='update', operation='collect')
                 else:
                     response['data']['abnormal_ip'].append(agent_ip)
@@ -77,18 +77,28 @@ class LogCollectView(APIView):
                     size = log.get('size', '')
                     user_agent = log.get('user_agent', '')
 
+
                     # 根据 remote_addr 获取所属地区
-                    country = get_country(remote_addr)
+                    ip_location = get_ip_location(remote_addr)
 
                     # 数据库更新数据，如果不存在，创建
-                    RequestData.objects.update_or_create(agent_ip=agent_ip,
-                                                         request_time=request_time,
-                                                         method=method,
-                                                         url=url,
-                                                         status=status,
-                                                         size=size,
-                                                         user_agent=user_agent,
-                                                         country=country)
+                    RequestData.objects.update_or_create(
+                        agent_ip=agent_ip,
+                        request_time=request_time,
+                        method=method,
+                        url=url,
+                        status=status,
+                        size=size,
+                        user_agent=user_agent,
+                        continent=ip_location['continent'],
+                        continent_cn=ip_location['continent_cn'],
+                        country_name=ip_location['country_name'],
+                        country_name_cn=ip_location['country_name_cn'],
+                        country_specific_name=ip_location['country_specific_name'],
+                        country_specific_name_cn=ip_location['country_specific_name_cn'],
+                        city_name=ip_location['city_name'],
+                        city_name_cn=ip_location['city_name_cn']
+                    )
                 Agent.objects.filter(agent_ip=agent_ip).update(management='generality', operation='')
                 response['data']['health_ip'].append(agent_ip)
                 LOG.info("update agent log success! agent_ip: %s", agent_ip)

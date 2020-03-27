@@ -1,6 +1,7 @@
 import json
 import logging
 import requests
+from requests import exceptions
 
 from django.core import serializers
 from rest_framework.views import APIView
@@ -56,11 +57,15 @@ class AgentHealthCheckView(APIView):
             for agent_info in agents_info:
                 agent_url = agent_info + "/agent/health_check"
                 agent_ip = agent_url.split('/')[2]
-                r = requests.get(agent_url)
-                if r.status_code == 200:
-                    Agent.objects.filter(agent_ip=agent_ip).update(agent_status='health')
-                else:
+                try:
+                    r = requests.get(agent_url, timeout=5)
+                    if r.status_code == 200:
+                        Agent.objects.filter(agent_ip=agent_ip).update(agent_status='health')
+                    else:
+                        Agent.objects.filter(agent_ip=agent_ip).update(agent_status='abnormal')
+                except exceptions.Timeout as e:
                     Agent.objects.filter(agent_ip=agent_ip).update(agent_status='abnormal')
+                    LOG.error('agent status abnormal! error info: %s', e)
                 LOG.info("check agent: %s", agent_ip)
         except Exception as e:
             response['status_code'] = "500"
