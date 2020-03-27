@@ -56,7 +56,9 @@ class LogCollectView(APIView):
                 agent_obj = Agent.objects.filter(agent_ip=agent_ip)
                 if not agent_obj:
                     agent_obj = Agent.objects.create(agent_ip=agent_ip, agent_status='health')
-                if agent_obj[0].agent_status == 'health':
+                else:
+                    agent_obj = Agent.objects.get(agent_ip=agent_ip)
+                if agent_obj.agent_status == 'health':
                     Agent.objects.filter(agent_ip=agent_ip).update(management='update', operation='collect')
                 else:
                     response['data']['abnormal_ip'].append(agent_ip)
@@ -84,9 +86,11 @@ class LogCollectView(APIView):
                     # 数据库更新数据，如果不存在，创建
                     RequestData.objects.update_or_create(
                         agent_ip=agent_ip,
+                        remote_addr=remote_addr,
                         request_time=request_time,
                         method=method,
                         url=url,
+                        protocol=protocol,
                         status=status,
                         size=size,
                         user_agent=user_agent,

@@ -81,3 +81,8 @@ class IPCount(models.Model):
     remote_addr = models.CharField(max_length=512, blank=True)
     remote_addr_number = models.IntegerField()
 
+    class Meta:
+        """IPCount meta data"""
+        managed = True
+        db_table = "ip_count"
+
